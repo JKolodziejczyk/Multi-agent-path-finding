@@ -6,11 +6,20 @@
         xmlns:local="clr-namespace:Bargaining_game_implementation"
         mc:Ignorable="d"
         Title="MainWindow"  Height="450" Width="850">
-    <Grid Name="grid" Margin="0,0,150,0">
-        <Grid.RowDefinitions>
-        </Grid.RowDefinitions>
+    <Grid Name="mainGrid">
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="6*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
+        <Grid Name="grid" Background="Gray">
+            <Grid.RowDefinitions>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+            </Grid.ColumnDefinitions>
+        </Grid>
+        <Grid Name="controlGrid">
+            <Button x:Name="start" Click="Start_Click" Content="Start" Margin="726,45,-118,342" AutomationProperties.IsOffscreenBehavior="Onscreen" />
+        </Grid>
     </Grid>
 
 </Window>
