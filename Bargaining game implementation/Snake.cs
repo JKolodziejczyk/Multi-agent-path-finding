@@ -21,8 +21,6 @@ namespace Bargaining_game_implementation
             this.Body = new List<int>();
             this.Moves = new List<int>();
             this.Body.Add(1);
-            this.Body.Add(1);
-            this.Body.Add(2);
             this.HeadPosition = new int[2];
             this.TailPosition = new int[2];
             this.Scope = scope;
@@ -34,11 +32,11 @@ namespace Bargaining_game_implementation
             switch (direction)
             {
                 case 1:
-                    return Scope.rectDict[HeadPosition[1] - 1 * Scope.height + HeadPosition[0]].Fill != Brushes.Green;
+                    return Scope.rectDict[(HeadPosition[1] - 1) * Scope.height + HeadPosition[0]].Fill != Brushes.Green;
                 case 2:
                     return Scope.rectDict[HeadPosition[1] * Scope.height + HeadPosition[0] + 1].Fill != Brushes.Green;
                 case 3:
-                    return Scope.rectDict[HeadPosition[1] + 1 * Scope.height + HeadPosition[0]].Fill != Brushes.Green;
+                    return Scope.rectDict[(HeadPosition[1] + 1) * Scope.height + HeadPosition[0]].Fill != Brushes.Green;
                 case 4:
                     return Scope.rectDict[HeadPosition[1] * Scope.height + HeadPosition[0] - 1].Fill != Brushes.Green;
                 default:
@@ -68,7 +66,6 @@ namespace Bargaining_game_implementation
                 default:
                     break;
             }
-            Scope.rectDict[HeadPosition[1] * Scope.height + HeadPosition[0]].Fill = Brushes.Green;
             if (Scope.rectDict[HeadPosition[1] * Scope.height + HeadPosition[0]].Fill != Brushes.Red)
             {
                 Scope.rectDict[TailPosition[1] * Scope.height + TailPosition[0]].Fill = Brushes.Gray;
@@ -91,6 +88,7 @@ namespace Bargaining_game_implementation
                 }
                 Body.RemoveAt(Body.Count - 1);
             }
+            Scope.rectDict[HeadPosition[1] * Scope.height + HeadPosition[0]].Fill = Brushes.Green;
         }
         public enum Directions
         {

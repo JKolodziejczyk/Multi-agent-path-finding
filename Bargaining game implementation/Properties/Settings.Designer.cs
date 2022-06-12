@@ -49,7 +49,7 @@ namespace Bargaining_game_implementation.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        [global::System.Configuration.DefaultSettingValueAttribute("30")]
         public int FPS {
             get {
                 return ((int)(this["FPS"]));
@@ -61,7 +61,7 @@ namespace Bargaining_game_implementation.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        [global::System.Configuration.DefaultSettingValueAttribute("3")]
         public int Players {
             get {
                 return ((int)(this["Players"]));

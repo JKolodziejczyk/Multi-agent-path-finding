@@ -42,7 +42,8 @@ namespace Bargaining_game_implementation
             start.Visibility = Visibility.Visible;
             DrawRectangles();
             InitializeSnakes();
-
+            DrawTargets();
+            stop.IsEnabled = false;
         }
         public void DrawRectangles()
         {
@@ -61,6 +62,25 @@ namespace Bargaining_game_implementation
                     //if (i % 2 == 0) rectDict[j * height + i].Fill = Brushes.Green;
                 }
             }
+        }
+        public List<(int,int)> DrawTargets()
+        {
+            List<(int, int)> targets = new List<(int, int)>();
+            for (int i = 0; i < players; i++)
+            {
+                var number1 = rnd.Next(0, width);
+                var number2 = rnd.Next(0, height);
+                if (rectDict[number1*height+number2].Fill == Brushes.Gray)
+                {
+                    rectDict[number1*height+number2].Fill = Brushes.Red;
+                    targets.Add((number1, number2));
+                }
+                else
+                {
+                    i--;
+                }
+            }
+            return targets;
         }
         public void SplitGrid()
         {
@@ -180,7 +200,30 @@ namespace Bargaining_game_implementation
         private void Start_Click(object sender, RoutedEventArgs e)
         {
             timer.Start();
+            stop.IsEnabled = true;
             //SimulationStep();
+        }
+
+        private void settings_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsWindow settings = new SettingsWindow();
+            settings.Show();
+            timer.Stop();
+            this.Close();
+        }
+
+        private void stop_Click(object sender, RoutedEventArgs e)
+        {
+            if (timer.IsEnabled) 
+            {
+                timer.Stop();
+                stop.Content = "Resume";
+            }
+            else
+            {
+                timer.Start();
+                stop.Content = "Stop";
+            }
         }
     }
 }

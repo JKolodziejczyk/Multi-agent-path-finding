@@ -17,8 +17,22 @@
             <Grid.ColumnDefinitions>
             </Grid.ColumnDefinitions>
         </Grid>
-        <Grid Name="controlGrid">
-            <Button x:Name="start" Click="Start_Click" Content="Start" Margin="726,45,-118,342" AutomationProperties.IsOffscreenBehavior="Onscreen" />
+        <Grid Name="controlGrid" Grid.Column="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="2*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="2*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="2*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="2*" />
+            </Grid.RowDefinitions>
+            <Button x:Name="start" Grid.Row="1" Click="Start_Click" Content="Start" AutomationProperties.IsOffscreenBehavior="Onscreen" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            <Button x:Name="stop" Grid.Row="3" Content="Stop" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="stop_Click"/>
+            <Button x:Name="settings" Grid.Row="5" Content="Settings" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="settings_Click"/>
         </Grid>
     </Grid>
 
