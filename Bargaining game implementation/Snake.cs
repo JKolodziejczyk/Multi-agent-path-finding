@@ -18,6 +18,8 @@ namespace Bargaining_game_implementation
         public int[] Target { get; set; }
         public bool IsFocusedOnTarget { get; set; }
 
+        public String moveResult { get; set; }
+
         public Snake(int length, MainWindow scope)
         {
             this.Body = new List<int>();
@@ -29,6 +31,7 @@ namespace Bargaining_game_implementation
             this.Target = new int[2];
             IsFocusedOnTarget = false;
             CurrentDirection = 3;
+            moveResult = "";
         }
         public bool CheckIfMovePossible(int direction)
         {
@@ -118,8 +121,10 @@ namespace Bargaining_game_implementation
                 default:
                     break;
             }
+
             if (simulationArray[HeadPosition[1] * Scope.height + HeadPosition[0]] != 0)
             {
+                //if (this.Moves.Any() == false) return false;
                 return true;
             }
             else

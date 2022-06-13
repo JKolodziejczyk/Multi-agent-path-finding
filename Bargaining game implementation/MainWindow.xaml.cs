@@ -418,10 +418,102 @@ namespace Bargaining_game_implementation
 
 
 
-        void ChangePath(Snake snake1, Snake snake2, int[] simulationArray)
+        void ChangePath(Snake snake1, Snake snake2, int[] fruitArray)
         {
+            fruitArray.CopyTo(simulationArray, 0);
+            var snake1Copy = new Snake(1, this)
+            {
+                Body = new List<int>(snake1.Body),
+                Moves = new List<int>(snake1.Moves),
+                HeadPosition = new int[2] { snake1.HeadPosition[0], snake1.HeadPosition[1] },
+                TailPosition = new int[2] { snake1.TailPosition[0], snake1.TailPosition[1] },
+            };
+            var snake2Copy = new Snake(1, this)
+            {
+                Body = new List<int>(snake2.Body),
+                Moves = new List<int>(snake2.Moves),
+                HeadPosition = new int[2] { snake2.HeadPosition[0], snake2.HeadPosition[1] },
+                TailPosition = new int[2] { snake2.TailPosition[0], snake2.TailPosition[1] },
+
+            };
+
+            int blockPosition = snake1.HeadPosition[1] * height + snake1.HeadPosition[0];
+            int head = snake1.HeadPosition[1] * height + snake1.HeadPosition[0];
+            simulationArray[blockPosition] = 1;
+            foreach (var m in snake1.Body)
+            {
+                switch (m)
+                {
+                    case 1:
+                        blockPosition += height;
+                        simulationArray[blockPosition] = 1;
+                        break;
+                    case 2:
+                        blockPosition -= 1;
+                        simulationArray[blockPosition] = 1;
+                        break;
+                    case 3:
+                        blockPosition -= height;
+                        simulationArray[blockPosition] = 1;
+                        break;
+                    case 4:
+                        blockPosition += 1;
+                        simulationArray[blockPosition] = 1;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            var blockPosition2 = snake2.HeadPosition[1] * height + snake2.HeadPosition[0];
+            var head2 = snake2.HeadPosition[1] * height + snake2.HeadPosition[0];
+            simulationArray[blockPosition2] = 1;
+            foreach (var m in snake2.Body)
+            {
+                switch (m)
+                {
+                    case 1:
+                        blockPosition2 += height;
+                        simulationArray[blockPosition2] = 1;
+                        break;
+                    case 2:
+                        blockPosition2 -= 1;
+                        simulationArray[blockPosition2] = 1;
+                        break;
+                    case 3:
+                        blockPosition2 -= height;
+                        simulationArray[blockPosition2] = 1;
+                        break;
+                    case 4:
+                        blockPosition2 += 1;
+                        simulationArray[blockPosition2] = 1;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            //RecursiveSnakePathfinder(snake1Copy, snake2Copy, simulationArray);
+            //podpiac movy pod snaki
+
 
         }
+
+        bool RecursiveTwoSnakesPathfinder(Snake snake1, Snake snake2, int[] moveArray)
+        {
+            return true;
+        }
+
+        bool RecursiveSnakePathfinder(Snake snake, int[] moveArray)
+        {
+            if (snake.HeadPosition[0] == snake.TailPosition[0] && snake.HeadPosition[1] == snake.TailPosition[1])
+            {
+                return true;
+            }
+            if(snake.Moves.FirstOrDefault())
+
+            return false;
+        }
+
 
 
         public void Iteration()
@@ -489,7 +581,7 @@ namespace Bargaining_game_implementation
                         if (FixTwoSnakes(snake,snake2, fruitArray))
                         {
                             change = true;
-                            //ChangePath(snake, snake2, fruitArray);
+                            ChangePath(snake, snake2, fruitArray);
                         }
                         
                     }
