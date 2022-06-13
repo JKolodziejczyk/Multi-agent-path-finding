@@ -29,6 +29,7 @@ namespace Bargaining_game_implementation
         public Dictionary<int, Rectangle> rectDict = new Dictionary<int, Rectangle>();
         List<Snake> snakes = new List<Snake>();
         Random rnd = new Random();
+        public int[] simulationArray = new int[Properties.Settings.Default.Width* Properties.Settings.Default.Height];
 
         public MainWindow()
         {
@@ -153,7 +154,7 @@ namespace Bargaining_game_implementation
             }
             if (!moving)
             {
-                iteration();
+                Iteration();
             }
             foreach (var snake in snakes)
             {
@@ -243,12 +244,12 @@ namespace Bargaining_game_implementation
             }
         }
 
-        public void fixBoard()
+        public void FixBoard()
         {
             //przejscie po calej planszy i sfixowanie wartosci zielonych pol
         }
 
-        bool checkMax(Snake snake1, Snake snake2)
+        bool CheckMax(Snake snake1, Snake snake2)
         {
             int maxOld = Math.Max(
                 Math.Abs(snake1.Target[0] - snake1.HeadPosition[0])+Math.Abs(snake1.Target[1] - snake1.HeadPosition[1]),
@@ -264,7 +265,7 @@ namespace Bargaining_game_implementation
                 //wywala true jak zmiana jest niepotrzebna
         }
 
-        void changeTargets(Snake snake1, Snake snake2)
+        void ChangeTargets(Snake snake1, Snake snake2)
         {
             var temporary = snake1.Target[0];
             snake1.Target[0] = snake2.Target[0];
@@ -275,7 +276,7 @@ namespace Bargaining_game_implementation
             snake2.Target[1] = temporary;
         }
 
-        void findBasePath(Snake snake)
+        void FindBasePath(Snake snake)
         {
             int snakeX = snake.HeadPosition[1];
             int snakeY = snake.HeadPosition[0];
@@ -315,11 +316,112 @@ namespace Bargaining_game_implementation
 
         }
 
-        public void iteration()
+
+        bool FixTwoSnakes(Snake snake1, Snake snake2)
         {
-            //fixBoard();
+            bool change = false;
+            var snake1Copy = new Snake(1, this)
+            {
+                Body = new List<int>(snake1.Body),
+                Moves = new List<int>(snake1.Moves),
+                HeadPosition = new int[2] { snake1.HeadPosition[0], snake1.HeadPosition[1] },
+                TailPosition = new int[2] { snake1.TailPosition[0], snake1.TailPosition[1] },
+            };
+            var snake2Copy = new Snake(1, this)
+            {
+                Body = new List<int>(snake2.Body),
+                Moves = new List<int>(snake2.Moves),
+                HeadPosition = new int[2] { snake2.HeadPosition[0], snake2.HeadPosition[1] },
+                TailPosition = new int[2] { snake2.TailPosition[0], snake2.TailPosition[1] },
+
+            };
+
+            int blockPosition = snake1.HeadPosition[1] * height + snake1.HeadPosition[0];
+            int head = snake1.HeadPosition[1] * height + snake1.HeadPosition[0];
+            simulationArray[blockPosition] = 1;
+            foreach (var m in snake1.Body)
+            {
+                switch (m)
+                {
+                    case 1:
+                        blockPosition += height;
+                        simulationArray[blockPosition] = 1;
+                        break;
+                    case 2:
+                        blockPosition -= 1;
+                        simulationArray[blockPosition] = 1;
+                        break;
+                    case 3:
+                        blockPosition -= height;
+                        simulationArray[blockPosition] = 1;
+                        break;
+                    case 4:
+                        blockPosition += 1;
+                        simulationArray[blockPosition] = 1;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            var blockPosition2 = snake2.HeadPosition[1] * height + snake2.HeadPosition[0];
+            var head2 = snake2.HeadPosition[1] * height + snake2.HeadPosition[0];
+            simulationArray[blockPosition2] = 1;
+            foreach (var m in snake2.Body)
+            {
+                switch (m)
+                {
+                    case 1:
+                        blockPosition2 += height;
+                        simulationArray[blockPosition2] = 1;
+                        break;
+                    case 2:
+                        blockPosition2 -= 1;
+                        simulationArray[blockPosition2] = 1;
+                        break;
+                    case 3:
+                        blockPosition2 -= height;
+                        simulationArray[blockPosition2] = 1;
+                        break;
+                    case 4:
+                        blockPosition2 += 1;
+                        simulationArray[blockPosition2] = 1;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            List<Snake> snakes = new List<Snake> { snake1Copy, snake2Copy };
+            while (Math.Max(snake1Copy.Moves.Count, snake2Copy.Moves.Count) > 0 && !change)
+            {
+                foreach (var snake in snakes)
+                {
+                    int direction = 0;
+                    if (snake.Moves.Any())
+                    {
+                        direction = snake.Moves.FirstOrDefault();
+                        snake.Moves.RemoveAt(0);
+                        change = snake.FakeMove(direction, simulationArray);
+                    }
+                    if (change)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return change;
+
+        }
+
+
+
+
+        public void Iteration()
+        {
+            //FixBoard();
             List<(int, int)> targets = DrawTargets();
-            foreach(var snake in snakes)
+            foreach (var snake in snakes)
             {
                 snake.IsFocusedOnTarget = true;
                 var target = targets.FirstOrDefault();
@@ -333,52 +435,52 @@ namespace Bargaining_game_implementation
                     "Save", MessageBoxButton.YesNoCancel,
                     MessageBoxImage.Question, MessageBoxResult.Cancel) != MessageBoxResult.Yes);*/
                 }
-                snake.Target[0]=target.Item1;
-                snake.Target[1]=target.Item2;
+                snake.Target[0] = target.Item1;
+                snake.Target[1] = target.Item2;
             }
 
-            bool change=true;
+            bool change = true;
             while (change)
             {
-                change=false;
-                foreach(var snake in snakes)
+                change = false;
+                foreach (var snake in snakes)
                 {
-                    foreach(var snake2 in snakes)
+                    foreach (var snake2 in snakes)
                     {
-                        if(snake2 == snake) continue;
-                        if (!checkMax(snake,snake2) )
+                        if (snake2 == snake) continue;
+                        if (!CheckMax(snake, snake2))
                         {
-                            changeTargets(snake, snake2);
+                            ChangeTargets(snake, snake2);
                             // przy maksymalnej odleglosci - zmiana
+                            change = true;
+                        }
+
+                    }
+                }
+            }
+
+            foreach (var snake in snakes)
+            {
+                FindBasePath(snake);
+            }
+
+            change = true;
+            while (change)
+            {
+                change = false;
+                foreach (var snake in snakes)
+                {
+                    foreach (var snake2 in snakes)
+                    {
+                        if (snake2 == snake) continue;
+                        if (FixTwoSnakes(snake,snake2))
+                        {
                             change = true;
                         }
                         
                     }
                 }
-            }
-
-            foreach(var snake in snakes)
-            {
-                findBasePath(snake);
-            }
-
-            /*change = true;
-            while (change)
-            {
-                change=false;
-                foreach(var snake in snakes)
-                {
-                    foreach(var snake2 in snakes)
-                    {
-                        if(snake2 == snake) continue;
-                        if () 
-                        {
-                            
-                        }
-                        //wyznaczenie sciezek dla obu - jezeli nie bylo zamiany to sprawdzenie czy maja juz sciezki
-                   }
-                }
-            }*/
+            } 
         }
     }
 }
