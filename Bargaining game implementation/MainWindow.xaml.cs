@@ -29,6 +29,7 @@ namespace Bargaining_game_implementation
         public Dictionary<int, Rectangle> rectDict = new Dictionary<int, Rectangle>();
         List<Snake> snakes = new List<Snake>();
         Random rnd = new Random();
+        public int[] backgroundBoard = new int[Properties.Settings.Default.Width * Properties.Settings.Default.Height];
 
         public MainWindow()
         {
@@ -231,7 +232,7 @@ namespace Bargaining_game_implementation
 
         private void stop_Click(object sender, RoutedEventArgs e)
         {
-            if (timer.IsEnabled) 
+            if (timer.IsEnabled)
             {
                 timer.Stop();
                 stop.Content = "Resume";
@@ -314,7 +315,6 @@ namespace Bargaining_game_implementation
             }
 
         }
-
         public void iteration()
         {
             //fixBoard();

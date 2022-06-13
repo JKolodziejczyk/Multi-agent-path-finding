@@ -95,6 +95,7 @@ namespace Bargaining_game_implementation
             }
             Scope.rectDict[HeadPosition[1] * Scope.height + HeadPosition[0]].Fill = Brushes.Green;
         }
+
         public enum Directions
         {
             right = 1,
