@@ -317,8 +317,9 @@ namespace Bargaining_game_implementation
         }
 
 
-        bool FixTwoSnakes(Snake snake1, Snake snake2, int[] simulationArray)
+        bool FixTwoSnakes(Snake snake1, Snake snake2, int[] fruitArray)
         {
+            fruitArray.CopyTo(simulationArray, 0);
             bool change = false;
             var snake1Copy = new Snake(1, this)
             {
@@ -445,10 +446,10 @@ namespace Bargaining_game_implementation
                 snake.Target[1] = target.Item2;
             }
 
-            int[] simulationArray = new int[width * height];
+            int[] fruitArray = new int[width * height];
             foreach(var target in targets)
             {
-                simulationArray[target.Item2 * height + target.Item1] = 2;
+                fruitArray[target.Item2 * height + target.Item1] = 2;
             }
 
             bool change = true;
@@ -485,10 +486,10 @@ namespace Bargaining_game_implementation
                     foreach (var snake2 in snakes)
                     {
                         if (snake2 == snake) continue;
-                        if (FixTwoSnakes(snake,snake2, simulationArray))
+                        if (FixTwoSnakes(snake,snake2, fruitArray))
                         {
                             change = true;
-                            ChangePath(snake, snake2, simulationArray);
+                            //ChangePath(snake, snake2, fruitArray);
                         }
                         
                     }
