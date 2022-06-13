@@ -124,7 +124,7 @@ namespace Bargaining_game_implementation
 
             if (simulationArray[HeadPosition[1] * Scope.height + HeadPosition[0]] != 0)
             {
-                //if (this.Moves.Any() == false) return false;
+                if (!this.Moves.Any()) return false;
                 return true;
             }
             else
