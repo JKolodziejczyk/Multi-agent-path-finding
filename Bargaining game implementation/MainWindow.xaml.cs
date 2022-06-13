@@ -244,11 +244,6 @@ namespace Bargaining_game_implementation
             }
         }
 
-        public void FixBoard()
-        {
-            //przejscie po calej planszy i sfixowanie wartosci zielonych pol
-        }
-
         bool CheckMax(Snake snake1, Snake snake2)
         {
             int maxOld = Math.Max(
@@ -492,41 +487,102 @@ namespace Bargaining_game_implementation
                         break;
                 }
             }
-            //RecursiveSnakePathfinder(snake1Copy, snake2Copy, simulationArray);
+            RecursiveTwoSnakesPathfinder(snake1Copy, snake2Copy, simulationArray);
             //podpiac movy pod snaki
 
 
         }
+        void TestXD(Snake snake1, Snake snake2)
+        {
+            ChangeTargets(snake1, snake2);
+            List<int> movesCopy = new List<int>(snake1.Moves);
+            snake1.Moves = new List<int>(snake2.Moves);
+            snake2.Moves = new List<int>(movesCopy);
+        }
 
         bool RecursiveTwoSnakesPathfinder(Snake snake1, Snake snake2, int[] moveArray)
         {
-            return true;
-        }
-
-        bool RecursiveSnakePathfinder(Snake snake, int[] moveArray)
-        {
-            if (snake.HeadPosition[0] == snake.TailPosition[0] && snake.HeadPosition[1] == snake.TailPosition[1])
+            /*if (snake1.HeadPosition[0] == snake1.Target[0] && snake1.HeadPosition[1] == snake1.Target[1] &&
+                snake2.HeadPosition[0] == snake2.Target[0] && snake2.HeadPosition[1] == snake2.Target[1])
+            {
+                return true;
+            }*/
+            if(!snake1.Moves.Any() && !snake2.Moves.Any())
             {
                 return true;
             }
-            if(snake.Moves.FirstOrDefault())
+
+            bool last1 = false;
+            bool last2 = false;
+            if(snake1.Moves.Count == 1)
+            {
+                last1 = true;
+            }
+
+            if (snake2.Moves.Count == 1)
+            {
+                last2 = true;
+            }
+
+           // if()
 
             return false;
         }
 
+        bool FindPath(int head0next, int head1next, Snake snake, int[] moveArray)
+        {
+            if (head0next < 0 || head1next < 0 || head0next >= height || head1next >= width) //nie wiem czy width i height
+            {
+                return false;
+            }
+            if (head0next == snake.Target[0] && head1next == snake.Target[1])
+            {
+                return true;
+            }
+            if (moveArray[head1next*height+head0next] != 0 || !(head0next == snake.Target[0] && head1next == snake.Target[1]))
+            {
+                return false;
+            }
+            //nadpisuje sobie arrayki i snaki - chyba musze zrobic nowa arrayke
 
+            //do poprawki kierunkowosc
+            if (FindPath(head0next, head1next-1, snake, moveArray) == true)
+            {
+                snake.moveResult = "" + snake.moveResult;
+                return true;
+            }
+            if (FindPath(head0next, head1next+1, snake, moveArray) == true)
+            {
+                snake.moveResult = "" + snake.moveResult;
+                return true;
+            }
+            if (FindPath(head0next-1, head1next, snake, moveArray) == true)
+            {
+                snake.moveResult = "" + snake.moveResult;
+                return true;
+            }
+            if (FindPath(head0next+1, head1next, snake, moveArray) == true)
+            {
+                snake.moveResult = "" + snake.moveResult;
+                return true;
+            }
+
+            return false;
+
+        }
 
         public void Iteration()
         {
-            //FixBoard();
+
             List<(int, int)> targets = DrawTargets();
+            var targetsTemp = new List<(int, int)>(targets);
             foreach (var snake in snakes)
             {
                 snake.IsFocusedOnTarget = true;
-                var target = targets.FirstOrDefault();
+                var target = targetsTemp.FirstOrDefault();
                 try
                 {
-                    targets.RemoveAt(0);
+                    targetsTemp.RemoveAt(0);
                 }
                 catch
                 {
@@ -569,24 +625,21 @@ namespace Bargaining_game_implementation
                 FindBasePath(snake);
             }
 
-            change = true;
-            while (change)
+            //mozna posortowac po max dlugosci od targetu
+            for(int i = 0; i < snakes.Count(); i++)
             {
-                change = false;
-                foreach (var snake in snakes)
+                if(i != 0) // <- snake 1
                 {
-                    foreach (var snake2 in snakes)
+                    for(int j = 0; j < i; j++) // <- snake 2
                     {
-                        if (snake2 == snake) continue;
                         if (FixTwoSnakes(snake,snake2, fruitArray))
                         {
-                            change = true;
-                            ChangePath(snake, snake2, fruitArray);
+                            FindPath() //glowa s2, s2, fruit array
                         }
-                        
                     }
                 }
-            } 
+            }
+ 
         }
     }
 }

@@ -124,7 +124,7 @@ namespace Bargaining_game_implementation
 
             if (simulationArray[HeadPosition[1] * Scope.height + HeadPosition[0]] != 0)
             {
-                //if (this.Moves.Any() == false) return false;
+                if (!this.Moves.Any()) return false;
                 return true;
             }
             else
@@ -150,6 +150,78 @@ namespace Bargaining_game_implementation
                 }
                 Body.RemoveAt(Body.Count - 1);
             }
+            return false;
+        }
+        public bool CorrectFutureMove(int direction, int[] simulationArray, bool last)
+        {
+            int positionAfterIn0 = HeadPosition[0];
+            int positionAfterIn1 = HeadPosition[1];
+            if (direction == 0) return true;
+
+            switch (direction)
+            {
+                case 1: //down
+                    positionAfterIn1--;
+                    break;
+                case 2: //right
+                    positionAfterIn0++;
+                    break;
+                case 3: //up
+                    positionAfterIn1++;
+                    break;
+                case 4: //left
+                    positionAfterIn0--;
+                    break;
+                default:
+                    break;
+            }
+
+            if ((simulationArray[positionAfterIn1 * Scope.height + positionAfterIn0] == 2 && last)
+                || simulationArray[positionAfterIn1 * Scope.height + positionAfterIn0] == 0)
+            {
+                /*CurrentDirection = direction;
+                direction = DirectionToCurrentDirection(direction);
+                Body.Insert(0, direction);
+                switch (direction)
+                {
+                    case 1: //down
+                        HeadPosition[1]--;
+                        break;
+                    case 2: //right
+                        HeadPosition[0]++;
+                        break;
+                    case 3: //up
+                        HeadPosition[1]++;
+                        break;
+                    case 4: //left
+                        HeadPosition[0]--;
+                        break;
+                    default:
+                        break;
+                }
+                simulationArray[HeadPosition[1] * Scope.height + HeadPosition[0]] = 1;
+                simulationArray[TailPosition[1] * Scope.height + TailPosition[0]] = 0;
+                switch (Body.Last())
+                {
+                    case 1:
+                        TailPosition[1]--;
+                        break;
+                    case 2:
+                        TailPosition[0]++;
+                        break;
+                    case 3:
+                        TailPosition[1]++;
+                        break;
+                    case 4:
+                        TailPosition[0]--;
+                        break;
+                    default:
+                        break;
+                }
+                Body.RemoveAt(Body.Count - 1);*/
+                return true;
+            }
+
             return false;
         }
         public enum Directions
