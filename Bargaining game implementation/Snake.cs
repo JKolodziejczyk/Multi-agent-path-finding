@@ -118,7 +118,7 @@ namespace Bargaining_game_implementation
                 default:
                     break;
             }
-            if (simulationArray[HeadPosition[1] * Scope.height + HeadPosition[0]] == 1)
+            if (simulationArray[HeadPosition[1] * Scope.height + HeadPosition[0]] != 0)
             {
                 return true;
             }

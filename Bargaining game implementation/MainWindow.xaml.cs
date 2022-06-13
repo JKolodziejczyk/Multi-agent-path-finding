@@ -317,7 +317,7 @@ namespace Bargaining_game_implementation
         }
 
 
-        bool FixTwoSnakes(Snake snake1, Snake snake2)
+        bool FixTwoSnakes(Snake snake1, Snake snake2, int[] simulationArray)
         {
             bool change = false;
             var snake1Copy = new Snake(1, this)
@@ -391,6 +391,7 @@ namespace Bargaining_game_implementation
                         break;
                 }
             }
+
             List<Snake> snakes = new List<Snake> { snake1Copy, snake2Copy };
             while (Math.Max(snake1Copy.Moves.Count, snake2Copy.Moves.Count) > 0 && !change)
             {
@@ -416,6 +417,11 @@ namespace Bargaining_game_implementation
 
 
 
+        void ChangePath(Snake snake1, Snake snake2, int[] simulationArray)
+        {
+
+        }
+
 
         public void Iteration()
         {
@@ -437,6 +443,12 @@ namespace Bargaining_game_implementation
                 }
                 snake.Target[0] = target.Item1;
                 snake.Target[1] = target.Item2;
+            }
+
+            int[] simulationArray = new int[width * height];
+            foreach(var target in targets)
+            {
+                simulationArray[target.Item2 * height + target.Item1] = 2;
             }
 
             bool change = true;
@@ -473,9 +485,10 @@ namespace Bargaining_game_implementation
                     foreach (var snake2 in snakes)
                     {
                         if (snake2 == snake) continue;
-                        if (FixTwoSnakes(snake,snake2))
+                        if (FixTwoSnakes(snake,snake2, simulationArray))
                         {
                             change = true;
+                            ChangePath(snake, snake2, simulationArray);
                         }
                         
                     }
