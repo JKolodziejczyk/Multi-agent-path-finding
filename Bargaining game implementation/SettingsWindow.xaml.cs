@@ -57,9 +57,9 @@ namespace Bargaining_game_implementation
 
         private void exit_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
             MainWindow main = new MainWindow();
             main.Show();
+            this.Close();
         }
     }
 }

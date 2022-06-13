@@ -42,7 +42,7 @@ namespace Bargaining_game_implementation
             start.Visibility = Visibility.Visible;
             DrawRectangles();
             InitializeSnakes();
-            DrawTargets();
+            //DrawTargets();
             stop.IsEnabled = false;
         }
         public void DrawRectangles()
@@ -68,11 +68,11 @@ namespace Bargaining_game_implementation
             List<(int, int)> targets = new List<(int, int)>();
             for (int i = 0; i < players; i++)
             {
-                var number1 = rnd.Next(0, width);
-                var number2 = rnd.Next(0, height);
-                if (rectDict[number1*height+number2].Fill == Brushes.Gray)
+                var number1 = rnd.Next(0, height);
+                var number2 = rnd.Next(0, width);
+                if (rectDict[number2*height+number1].Fill == Brushes.Gray)
                 {
-                    rectDict[number1*height+number2].Fill = Brushes.Red;
+                    rectDict[number2*height+number1].Fill = Brushes.Red;
                     targets.Add((number1, number2));
                 }
                 else
@@ -108,8 +108,8 @@ namespace Bargaining_game_implementation
         {
             foreach(var snake in snakes)
             {
-                snake.HeadPosition[0] = rnd.Next(10, height - 10);
-                snake.HeadPosition[1] = rnd.Next(10, width - 10);
+                snake.HeadPosition[0] = rnd.Next(5, height - 5);
+                snake.HeadPosition[1] = rnd.Next(5, width - 5);
                 snake.TailPosition[0] = snake.HeadPosition[0];
                 snake.TailPosition[1] = snake.HeadPosition[1];
                 var headPosition = snake.HeadPosition[1] * height + snake.HeadPosition[0];
@@ -146,13 +146,28 @@ namespace Bargaining_game_implementation
         }
         public void SimulationStep(object sender, EventArgs e)
         {
+            bool moving = false;
+            foreach(var snake in snakes)
+            {
+                if (snake.IsFocusedOnTarget) moving = true;
+            }
+            if (!moving)
+            {
+                iteration();
+            }
             foreach (var snake in snakes)
             {
-                bool impossibleDirection = true;
-                int direction = 1;
-                while (impossibleDirection)
+                int direction = 0;
+                if (snake.Moves.Any())
                 {
-                    direction = rnd.Next(1, 5);
+                    direction = snake.Moves.FirstOrDefault();
+                    snake.Moves.RemoveAt(0);
+                }
+                else
+                {
+                    snake.IsFocusedOnTarget = false;
+                }
+                        /*
                     switch (direction)
                     {
                         case 1:
@@ -194,15 +209,15 @@ namespace Bargaining_game_implementation
                         default:
                             break;
                     }
-                }
+                        */
                 snake.Move(direction);
             }
         }
-        private async void Start_Click(object sender, RoutedEventArgs e)
+        private void Start_Click(object sender, RoutedEventArgs e)
         {
             timer.Start();
             stop.IsEnabled = true;
-            
+            start.IsEnabled = false;
             //SimulationStep();
         }
 
@@ -236,12 +251,12 @@ namespace Bargaining_game_implementation
         bool checkMax(Snake snake1, Snake snake2)
         {
             int maxOld = Math.Max(
-                Math.Abs(snake1.tagret[0] - snake1.HeadPosition[0])+Math.Abs(snake1.tagret[1] - snake1.HeadPosition[1]),
-                Math.Abs(snake2.tagret[0] - snake2.HeadPosition[0])+Math.Abs(snake2.tagret[1] - snake2.HeadPosition[1])
+                Math.Abs(snake1.Target[0] - snake1.HeadPosition[0])+Math.Abs(snake1.Target[1] - snake1.HeadPosition[1]),
+                Math.Abs(snake2.Target[0] - snake2.HeadPosition[0])+Math.Abs(snake2.Target[1] - snake2.HeadPosition[1])
                 );
             int maxNew = Math.Max(
-                Math.Abs(snake1.tagret[0] - snake2.HeadPosition[0])+Math.Abs(snake1.tagret[1] - snake2.HeadPosition[1]),
-                Math.Abs(snake2.tagret[0] - snake1.HeadPosition[0])+Math.Abs(snake2.tagret[1] - snake1.HeadPosition[1])
+                Math.Abs(snake1.Target[0] - snake2.HeadPosition[0])+Math.Abs(snake1.Target[1] - snake2.HeadPosition[1]),
+                Math.Abs(snake2.Target[0] - snake1.HeadPosition[0])+Math.Abs(snake2.Target[1] - snake1.HeadPosition[1])
                );
             if (maxOld > maxNew) return false;
 
@@ -251,49 +266,49 @@ namespace Bargaining_game_implementation
 
         void changeTargets(Snake snake1, Snake snake2)
         {
-            var temporary = snake1.tagret[0];
-            snake1.tagret[0] = snake2.tagret[0];
-            snake2.tagret[0] = temporary;
+            var temporary = snake1.Target[0];
+            snake1.Target[0] = snake2.Target[0];
+            snake2.Target[0] = temporary;
 
-            temporary = snake1.tagret[1];
-            snake1.tagret[1] = snake2.tagret[1];
-            snake2.tagret[1] = temporary;
+            temporary = snake1.Target[1];
+            snake1.Target[1] = snake2.Target[1];
+            snake2.Target[1] = temporary;
         }
 
         void findBasePath(Snake snake)
         {
-            int snakeX = snake.HeadPosition[0];
-            int snakeY = snake.HeadPosition[1];
-            if(snake.tagret[0] > snakeX)
+            int snakeX = snake.HeadPosition[1];
+            int snakeY = snake.HeadPosition[0];
+            if(snake.Target[0] > snakeY)
             {
-                while(snake.tagret[0] != snakeX)
+                while(snake.Target[0] != snakeY)
                 {
-                    snake.Moves.Add(1); //down
-                    snakeX++;
+                    snake.Moves.Add(4); //down
+                    snakeY++;
                 }
             }
             else
             {
-                while(snake.tagret[0] != snakeX)
+                while(snake.Target[0] != snakeY)
                 {
-                    snake.Moves.Add(3); //up
-                    snakeX--;
+                    snake.Moves.Add(2); //up
+                    snakeY--;
                 }
             }
             
-            if(snake.tagret[1] > snakeY)
+            if(snake.Target[1] > snakeX)
             {
-                while(snake.tagret[1] != snakeY)
+                while(snake.Target[1] != snakeX)
                 {
-                    snake.Moves.Add(2); //right
+                    snake.Moves.Add(1); //right
                     snakeX++;
                 }
             }
             else
             {
-                while(snake.tagret[1] != snakeY)
+                while(snake.Target[1] != snakeX)
                 {
-                    snake.Moves.Add(4); //left
+                    snake.Moves.Add(3); //left
                     snakeX--;
                 }
             }
@@ -306,6 +321,7 @@ namespace Bargaining_game_implementation
             List<(int, int)> targets = DrawTargets();
             foreach(var snake in snakes)
             {
+                snake.IsFocusedOnTarget = true;
                 var target = targets.FirstOrDefault();
                 try
                 {
@@ -317,8 +333,8 @@ namespace Bargaining_game_implementation
                     "Save", MessageBoxButton.YesNoCancel,
                     MessageBoxImage.Question, MessageBoxResult.Cancel) != MessageBoxResult.Yes);*/
                 }
-                snake.tagret[0]=target.Item1;
-                snake.tagret[1]=target.Item2;
+                snake.Target[0]=target.Item1;
+                snake.Target[1]=target.Item2;
             }
 
             bool change=true;
