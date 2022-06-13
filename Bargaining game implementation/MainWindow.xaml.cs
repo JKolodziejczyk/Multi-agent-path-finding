@@ -428,13 +428,14 @@ namespace Bargaining_game_implementation
         {
             //FixBoard();
             List<(int, int)> targets = DrawTargets();
+            var targetsTemp = new List<(int, int)>(targets);
             foreach (var snake in snakes)
             {
                 snake.IsFocusedOnTarget = true;
-                var target = targets.FirstOrDefault();
+                var target = targetsTemp.FirstOrDefault();
                 try
                 {
-                    targets.RemoveAt(0);
+                    targetsTemp.RemoveAt(0);
                 }
                 catch
                 {
