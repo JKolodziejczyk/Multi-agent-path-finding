@@ -82,6 +82,7 @@ namespace Bargaining_game_implementation
             }
             return targets;
         }
+
         public void SplitGrid()
         {
             var h = this.Height;
@@ -145,7 +146,7 @@ namespace Bargaining_game_implementation
         }
         public void SimulationStep(object sender, EventArgs e)
         {
-            foreach(var snake in snakes)
+            foreach (var snake in snakes)
             {
                 bool impossibleDirection = true;
                 int direction = 1;
@@ -197,10 +198,11 @@ namespace Bargaining_game_implementation
                 snake.Move(direction);
             }
         }
-        private void Start_Click(object sender, RoutedEventArgs e)
+        private async void Start_Click(object sender, RoutedEventArgs e)
         {
             timer.Start();
             stop.IsEnabled = true;
+            
             //SimulationStep();
         }
 
@@ -224,6 +226,143 @@ namespace Bargaining_game_implementation
                 timer.Start();
                 stop.Content = "Stop";
             }
+        }
+
+        public void fixBoard()
+        {
+            //przejscie po calej planszy i sfixowanie wartosci zielonych pol
+        }
+
+        bool checkMax(Snake snake1, Snake snake2)
+        {
+            int maxOld = Math.Max(
+                Math.Abs(snake1.tagret[0] - snake1.HeadPosition[0])+Math.Abs(snake1.tagret[1] - snake1.HeadPosition[1]),
+                Math.Abs(snake2.tagret[0] - snake2.HeadPosition[0])+Math.Abs(snake2.tagret[1] - snake2.HeadPosition[1])
+                );
+            int maxNew = Math.Max(
+                Math.Abs(snake1.tagret[0] - snake2.HeadPosition[0])+Math.Abs(snake1.tagret[1] - snake2.HeadPosition[1]),
+                Math.Abs(snake2.tagret[0] - snake1.HeadPosition[0])+Math.Abs(snake2.tagret[1] - snake1.HeadPosition[1])
+               );
+            if (maxOld > maxNew) return false;
+
+            return true;
+                //wywala true jak zmiana jest niepotrzebna
+        }
+
+        void changeTargets(Snake snake1, Snake snake2)
+        {
+            var temporary = snake1.tagret[0];
+            snake1.tagret[0] = snake2.tagret[0];
+            snake2.tagret[0] = temporary;
+
+            temporary = snake1.tagret[1];
+            snake1.tagret[1] = snake2.tagret[1];
+            snake2.tagret[1] = temporary;
+        }
+
+        void findBasePath(Snake snake)
+        {
+            int snakeX = snake.HeadPosition[0];
+            int snakeY = snake.HeadPosition[1];
+            if(snake.tagret[0] > snakeX)
+            {
+                while(snake.tagret[0] != snakeX)
+                {
+                    snake.Moves.Add(1); //down
+                    snakeX++;
+                }
+            }
+            else
+            {
+                while(snake.tagret[0] != snakeX)
+                {
+                    snake.Moves.Add(3); //up
+                    snakeX--;
+                }
+            }
+            
+            if(snake.tagret[1] > snakeY)
+            {
+                while(snake.tagret[1] != snakeY)
+                {
+                    snake.Moves.Add(2); //right
+                    snakeX++;
+                }
+            }
+            else
+            {
+                while(snake.tagret[1] != snakeY)
+                {
+                    snake.Moves.Add(4); //left
+                    snakeX--;
+                }
+            }
+
+        }
+
+        public void iteration()
+        {
+            //fixBoard();
+            List<(int, int)> targets = DrawTargets();
+            foreach(var snake in snakes)
+            {
+                var target = targets.FirstOrDefault();
+                try
+                {
+                    targets.RemoveAt(0);
+                }
+                catch
+                {
+                    /*MessageBox.Show("Error",
+                    "Save", MessageBoxButton.YesNoCancel,
+                    MessageBoxImage.Question, MessageBoxResult.Cancel) != MessageBoxResult.Yes);*/
+                }
+                snake.tagret[0]=target.Item1;
+                snake.tagret[1]=target.Item2;
+            }
+
+            bool change=true;
+            while (change)
+            {
+                change=false;
+                foreach(var snake in snakes)
+                {
+                    foreach(var snake2 in snakes)
+                    {
+                        if(snake2 == snake) continue;
+                        if (!checkMax(snake,snake2) )
+                        {
+                            changeTargets(snake, snake2);
+                            // przy maksymalnej odleglosci - zmiana
+                            change = true;
+                        }
+                        
+                    }
+                }
+            }
+
+            foreach(var snake in snakes)
+            {
+                findBasePath(snake);
+            }
+
+            /*change = true;
+            while (change)
+            {
+                change=false;
+                foreach(var snake in snakes)
+                {
+                    foreach(var snake2 in snakes)
+                    {
+                        if(snake2 == snake) continue;
+                        if () 
+                        {
+                            
+                        }
+                        //wyznaczenie sciezek dla obu - jezeli nie bylo zamiany to sprawdzenie czy maja juz sciezki
+                   }
+                }
+            }*/
         }
     }
 }

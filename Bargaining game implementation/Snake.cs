@@ -15,6 +15,7 @@ namespace Bargaining_game_implementation
         public int[] TailPosition { get; set; }
         public List<int> Moves { get; set; }
         private MainWindow Scope { get; }
+        public int[] tagret { get; set; }
 
         public Snake(int length, MainWindow scope)
         {
@@ -24,6 +25,7 @@ namespace Bargaining_game_implementation
             this.HeadPosition = new int[2];
             this.TailPosition = new int[2];
             this.Scope = scope;
+            this.tagret = new int[2]; 
             CurrentDirection = 3;
         }
         public bool CheckIfMovePossible(int direction)
@@ -51,16 +53,16 @@ namespace Bargaining_game_implementation
             Body.Insert(0, direction);
             switch (direction)
             {
-                case 1:
+                case 1: //down
                     HeadPosition[1]--;
                     break;
-                case 2:
+                case 2: //right
                     HeadPosition[0]++;
                     break;
-                case 3:
+                case 3: //up
                     HeadPosition[1]++;
                     break;
-                case 4:
+                case 4: //left
                     HeadPosition[0]--;
                     break;
                 default:
