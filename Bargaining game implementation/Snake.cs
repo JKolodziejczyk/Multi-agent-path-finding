@@ -95,7 +95,58 @@ namespace Bargaining_game_implementation
             }
             Scope.rectDict[HeadPosition[1] * Scope.height + HeadPosition[0]].Fill = Brushes.Green;
         }
-
+        public bool FakeMove(int direction, int[] simulationArray)
+        {
+            if (direction == 0) return true;
+            CurrentDirection = direction;
+            direction = DirectionToCurrentDirection(direction);
+            Body.Insert(0, direction);
+            switch (direction)
+            {
+                case 1: //down
+                    HeadPosition[1]--;
+                    break;
+                case 2: //right
+                    HeadPosition[0]++;
+                    break;
+                case 3: //up
+                    HeadPosition[1]++;
+                    break;
+                case 4: //left
+                    HeadPosition[0]--;
+                    break;
+                default:
+                    break;
+            }
+            if (simulationArray[HeadPosition[1] * Scope.height + HeadPosition[0]] == 1)
+            {
+                return true;
+            }
+            else
+            {
+                simulationArray[HeadPosition[1] * Scope.height + HeadPosition[0]] = 1;
+                simulationArray[TailPosition[1] * Scope.height + TailPosition[0]] = 0;
+                switch (Body.Last())
+                {
+                    case 1:
+                        TailPosition[1]--;
+                        break;
+                    case 2:
+                        TailPosition[0]++;
+                        break;
+                    case 3:
+                        TailPosition[1]++;
+                        break;
+                    case 4:
+                        TailPosition[0]--;
+                        break;
+                    default:
+                        break;
+                }
+                Body.RemoveAt(Body.Count - 1);
+            }
+            return false;
+        }
         public enum Directions
         {
             right = 1,
