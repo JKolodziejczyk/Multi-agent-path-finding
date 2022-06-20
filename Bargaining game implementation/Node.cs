@@ -9,10 +9,11 @@ namespace Bargaining_game_implementation
 {
     public class Node : IComparable
     {
-        public (int x,int y) Index { get; set; }
+        public (int x, int y) Index { get; set; }
         public bool IsOccupied { get; set; }
         public NodeList Neighbors { get; set; }
         public double Priority { get; set; }
+        public bool Visited { get; set; }
         public Node() { }
         public Node(int x, int y)
         {
@@ -20,6 +21,7 @@ namespace Bargaining_game_implementation
             IsOccupied = false;
             Priority = 0;
             Neighbors = new NodeList();
+            Visited = false;
         }
 
         public int CompareTo(object obj)

@@ -27,10 +27,12 @@ namespace Bargaining_game_implementation
         public int width = Properties.Settings.Default.Map;
         public int height = Properties.Settings.Default.Mode;
         public Dictionary<int, Rectangle> rectDict = new Dictionary<int, Rectangle>();
+        public Dictionary<int, TextBlock> textDict = new Dictionary<int, TextBlock>();
         List<Agent> agents = new List<Agent>();
-        List<(int, int)> targets;
+        List<(int, int)> targets = new List<(int, int)>();
         Random rnd = new Random();
         public Graph map;
+        int iteration = 0;
 
         public MainWindow()
         {
@@ -71,10 +73,17 @@ namespace Bargaining_game_implementation
                             Fill = Brushes.Black
                         };
                     }
+                    TextBlock block = new TextBlock();
+                    block.Foreground = Brushes.White;
+                    block.TextAlignment = TextAlignment.Center;
                     Grid.SetRow(rect, i);
                     Grid.SetColumn(rect, j);
+                    Grid.SetRow(block, i);
+                    Grid.SetColumn(block, j);
                     grid.Children.Add(rect);
+                    grid.Children.Add(block);
                     rectDict[j * height + i] = rect;
+                    textDict[j * height + i] = block;
                     //if (i % 2 == 0) rectDict[j * height + i].Fill = Brushes.Green;
                 }
             }
@@ -123,7 +132,18 @@ namespace Bargaining_game_implementation
             }
             return targets;
         }
-
+        public void CleanTargets()
+        {
+            foreach(var target in targets)
+            {
+                if(rectDict[target.Item2*height+target.Item1].Fill == Brushes.Red)
+                {
+                    var node = map.Nodes.Find(x => x.Index == (target.Item1, target.Item2));
+                    node.IsOccupied = false;
+                    rectDict[target.Item2 * height + target.Item1].Fill = Brushes.White;
+                }
+            }
+        }
         public void SplitGrid()
         {
             var h = this.Height;
@@ -141,7 +161,7 @@ namespace Bargaining_game_implementation
         {
             for (int i = 0; i < players; i++)
             {
-                agents.Add(new Agent(this));
+                agents.Add(new Agent(this, i+1));
             }
             DrawAgents();
             //TestAgents();
@@ -179,6 +199,7 @@ namespace Bargaining_game_implementation
                     {
                         agent.HeadPosition = map.Nodes.Find(node=> node.Index == (y, x));
                         rectDict[headPosition].Fill = Brushes.Blue;
+                        textDict[headPosition].Text = agent.Id.ToString();
                         draw = false;
                     }
                 }
@@ -189,46 +210,99 @@ namespace Bargaining_game_implementation
             bool moving = false;
             foreach(var agent in agents)
             {
-                if (agent.IsFocusedOnTarget) moving = true;
+                if (agent.IsFocusedOnTarget)
+                {
+                    moving = true;
+                }
+
             }
             if (!moving)
             {
-                targets = DrawTargets();
+                foreach(var agent in agents)
+                {
+                    agent.HeadPosition.IsOccupied = false;
+                }
+                do
+                {
+                    CleanTargets();
+                    targets = DrawTargets();
+                }
+                while (!map.IsConnected(targets));
+
+                foreach (var agent in agents)
+                {
+                    agent.HeadPosition.IsOccupied = true;
+                    //agent.HeadPosition.IsOccupied = false;
+                }
+                iteration = 0;
+                map.SpaceTime.Clear();
                 GetPaths();
+
             }
+            iteration++;
+            bool isSthMoving = false;
             foreach (var agent in agents)
             {
                 Node direction = new Node();
                 if (agent.Path.Any())
                 {
+                    isSthMoving = true;
                     direction = agent.Path.FirstOrDefault();
-                    if (direction.IsOccupied && direction.Index!=agent.Target.Index)
+                    if (direction.IsOccupied && direction.Index != agent.Target.Index && direction != agent.HeadPosition)
                     {
-                        if (agent.IsWaiting)
-                        {
-                            foreach (var node in agent.HeadPosition.Neighbors)
+                        //if (agent.IsWaiting)
+                        //{
+                        /*var random = rnd.Next(0, agent.HeadPosition.Neighbors.Count());
+                        var node = agent.HeadPosition.Neighbors[random];
+                        //foreach (var node in agent.HeadPosition.Neighbors)
+                        //{
+                            if (!node.IsOccupied)
                             {
-                                if (!node.IsOccupied)
-                                {
-                                    agent.Path.Insert(0, agent.HeadPosition);
-                                    agent.Move(node);
-                                    agent.IsWaiting = false;
-                                }
+                                agent.Path.Insert(0, agent.HeadPosition);
+                                agent.Move(node);
+                                agent.IsWaiting = false;
                             }
-                        }
-                        else
-                        {
-                            agent.IsWaiting = true;
-                        }
+                        //}*/
+                        agent.Path = map.AStarSearch(agent.HeadPosition, agent.Target,iteration);
+                        agent.IsWaiting = false;
+                        //}
+                        //else
+                        //{
+                        //agent.IsWaiting = true;
+                        //}
                         continue;
                     }
-                    agent.IsWaiting = false;
-                    agent.Path.RemoveAt(0);
-                    agent.Move(direction);
+                    else
+                    {
+                        agent.IsWaiting = false;
+                        agent.Path.RemoveAt(0);
+                        agent.Move(direction);
+                    }
                 }
                 else
                 {
-                    agent.IsFocusedOnTarget = false;
+                    if (agent.HeadPosition != agent.Target)
+                    {
+                        agent.Path = map.AStarSearch(agent.HeadPosition, agent.Target, iteration);
+                    }
+                    else
+                    {
+                        agent.IsFocusedOnTarget = false;
+                    }
+                }
+            }
+            if (!isSthMoving)
+            {
+                foreach (var agent in agents)
+                {
+                    if (agent.HeadPosition != agent.Target)
+                    {
+                        if (agent.HeadPosition.Neighbors.FirstOrDefault(x => !x.IsOccupied) == null)
+                        {
+                            agent.Path = new List<Node>();
+                        }
+                        agent.Path = new List<Node> { agent.HeadPosition.Neighbors.FirstOrDefault(x => !x.IsOccupied) };
+                    }
                 }
             }
         }
@@ -279,6 +353,7 @@ namespace Bargaining_game_implementation
                     MessageBoxImage.Question, MessageBoxResult.Cancel) != MessageBoxResult.Yes);*/
                 }
                 var node = map.Nodes.Find(x => x.Index == (target.Item1, target.Item2));
+                textDict[target.Item2 * height + target.Item1].Text = agent.Id.ToString();
                 agent.Target = node;
                 agent.Path = map.AStarSearch(agent.HeadPosition, agent.Target);
             }

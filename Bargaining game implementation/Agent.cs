@@ -15,21 +15,24 @@ namespace Bargaining_game_implementation
         public bool IsFocusedOnTarget { get; set; }
         public List<Node> Path { get; set; }
         public bool IsWaiting { get; set; }
+        public int Id { get; set; }
 
-        public Agent(MainWindow scope)
+        public Agent(MainWindow scope, int id)
         {
             this.Scope = scope;
             IsFocusedOnTarget = false;
             Path = new List<Node>();
             IsWaiting = false;
+            Id = id;
         }
         public void Move(Node direction)
         {
             Scope.rectDict[HeadPosition.Index.y * Scope.height + HeadPosition.Index.x].Fill = Brushes.White;
-            var node = Scope.map.Nodes.Find(x => x.Index == (HeadPosition.Index.x, HeadPosition.Index.y));
+            Scope.textDict[HeadPosition.Index.y * Scope.height + HeadPosition.Index.x].Text = "";
             HeadPosition.IsOccupied = false;
             HeadPosition = direction;
             Scope.rectDict[HeadPosition.Index.y * Scope.height + HeadPosition.Index.x].Fill = Brushes.Blue;
+            Scope.textDict[HeadPosition.Index.y * Scope.height + HeadPosition.Index.x].Text = Id.ToString();
             direction.IsOccupied = true;
         }
     }

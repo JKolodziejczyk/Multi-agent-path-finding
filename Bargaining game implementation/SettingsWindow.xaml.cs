@@ -41,7 +41,10 @@ namespace Bargaining_game_implementation
                     Properties.Settings.Default.Mode = int.Parse(HeightSet.Text);
                     Properties.Settings.Default.Players = int.Parse(PlayersSet.Text);
                     Properties.Settings.Default.FPS = int.Parse(FPSSet.Text);
-                    Properties.Settings.Default.Save();
+                    if (int.Parse(WidthSet.Text)<5 && int.Parse(WidthSet.Text)>=0)
+                    {
+                        Properties.Settings.Default.Save();
+                    }
                     MainWindow main = new MainWindow();
                     main.Show();
                     this.Close();
@@ -49,7 +52,7 @@ namespace Bargaining_game_implementation
                 }
                 catch (FormatException)
                 {
-                    Console.WriteLine("Input string is invalid.");
+                    MessageBox.Show("Input string is invalid.", "ERROR");
                     //e.Cancel = true;
                 }
             }
