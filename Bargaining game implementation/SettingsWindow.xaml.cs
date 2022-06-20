@@ -37,8 +37,8 @@ namespace Bargaining_game_implementation
             {
                 try
                 {
-                    Properties.Settings.Default.Width = int.Parse(WidthSet.Text);
-                    Properties.Settings.Default.Height = int.Parse(HeightSet.Text);
+                    Properties.Settings.Default.Map = int.Parse(WidthSet.Text);
+                    Properties.Settings.Default.Mode = int.Parse(HeightSet.Text);
                     Properties.Settings.Default.Players = int.Parse(PlayersSet.Text);
                     Properties.Settings.Default.FPS = int.Parse(FPSSet.Text);
                     Properties.Settings.Default.Save();

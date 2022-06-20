@@ -25,25 +25,25 @@ namespace Bargaining_game_implementation.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("50")]
-        public int Width {
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int Map {
             get {
-                return ((int)(this["Width"]));
+                return ((int)(this["Map"]));
             }
             set {
-                this["Width"] = value;
+                this["Map"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("30")]
-        public int Height {
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int Mode {
             get {
-                return ((int)(this["Height"]));
+                return ((int)(this["Mode"]));
             }
             set {
-                this["Height"] = value;
+                this["Mode"] = value;
             }
         }
         

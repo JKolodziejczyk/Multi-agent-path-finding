@@ -9,68 +9,28 @@ namespace Bargaining_game_implementation
 {
     public class Agent
     {
-        public int[] HeadPosition { get; set; }
-        public List<int> Moves { get; set; }
+        public Node HeadPosition { get; set; }
         private MainWindow Scope { get; }
-        public int[] Target { get; set; }
+        public Node Target { get; set; }
         public bool IsFocusedOnTarget { get; set; }
-        public String moveResult { get; set; }
+        public List<Node> Path { get; set; }
+        public bool IsWaiting { get; set; }
 
         public Agent(MainWindow scope)
         {
-            this.Moves = new List<int>();
-            this.HeadPosition = new int[2];
             this.Scope = scope;
-            this.Target = new int[2];
             IsFocusedOnTarget = false;
-            moveResult = "";
+            Path = new List<Node>();
+            IsWaiting = false;
         }
-        public void Move(int direction)
+        public void Move(Node direction)
         {
-            if (direction == 0) return;
-            direction = DirectionToCurrentDirection(direction);
-            Scope.rectDict[HeadPosition[1] * Scope.height + HeadPosition[0]].Fill = Brushes.Gray;
-            switch (direction)
-            {
-                case 1: //down
-                    HeadPosition[1]--;
-                    break;
-                case 2: //right
-                    HeadPosition[0]++;
-                    break;
-                case 3: //up
-                    HeadPosition[1]++;
-                    break;
-                case 4: //left
-                    HeadPosition[0]--;
-                    break;
-                default:
-                    break;
-            }
-            Scope.rectDict[HeadPosition[1] * Scope.height + HeadPosition[0]].Fill = Brushes.Green;
-        }
-        public enum Directions
-        {
-            right = 1,
-            up = 2,
-            left = 3,
-            down = 4
-        }
-        public int DirectionToCurrentDirection(int direction)
-        {
-            switch (direction)
-            {
-                case 1:
-                    return 3;
-                case 2:
-                    return 4;
-                case 3:
-                    return 1;
-                case 4:
-                    return 2;
-                default:
-                    return 0;
-            }
+            Scope.rectDict[HeadPosition.Index.y * Scope.height + HeadPosition.Index.x].Fill = Brushes.White;
+            var node = Scope.map.Nodes.Find(x => x.Index == (HeadPosition.Index.x, HeadPosition.Index.y));
+            HeadPosition.IsOccupied = false;
+            HeadPosition = direction;
+            Scope.rectDict[HeadPosition.Index.y * Scope.height + HeadPosition.Index.x].Fill = Brushes.Blue;
+            direction.IsOccupied = true;
         }
     }
 }

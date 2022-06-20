@@ -11,13 +11,13 @@
             <ColumnDefinition Width="6*"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <Grid Name="grid" Background="Gray">
+        <Grid Name="grid" Background="White">
             <Grid.RowDefinitions>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
             </Grid.ColumnDefinitions>
         </Grid>
-        <Grid Name="controlGrid" Grid.Column="2">
+        <Grid Name="controlGrid" Grid.Column="2" Background="Gray">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>

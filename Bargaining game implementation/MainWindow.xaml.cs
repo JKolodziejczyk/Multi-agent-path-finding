@@ -24,15 +24,19 @@ namespace Bargaining_game_implementation
         DispatcherTimer timer = new DispatcherTimer();
         public int players = Properties.Settings.Default.Players;
         public int FPS = Properties.Settings.Default.FPS;
-        public int width = Properties.Settings.Default.Width;
-        public int height = Properties.Settings.Default.Height;
+        public int width = Properties.Settings.Default.Map;
+        public int height = Properties.Settings.Default.Mode;
         public Dictionary<int, Rectangle> rectDict = new Dictionary<int, Rectangle>();
         List<Agent> agents = new List<Agent>();
+        List<(int, int)> targets;
         Random rnd = new Random();
-        public int[] simulationArray = new int[Properties.Settings.Default.Width* Properties.Settings.Default.Height];
+        public Graph map;
 
         public MainWindow()
         {
+            map = new Graph(ConstMaps.Maps[Properties.Settings.Default.Map]);
+            height = ConstMaps.Maps[Properties.Settings.Default.Map].Length;
+            width = ConstMaps.Maps[Properties.Settings.Default.Map][0].Length;
             InitializeComponent();
             timer.Interval = TimeSpan.FromMilliseconds(1000 / FPS);
             timer.Tick += SimulationStep;
@@ -40,10 +44,10 @@ namespace Bargaining_game_implementation
             //grid.Focus();
             //grid.BeginInit();
             //start.IsEnabled = true;
-            start.Visibility = Visibility.Visible;
+            //start.Visibility = Visibility.Visible;
             DrawRectangles();
             InitializeAgents();
-            //DrawTargets();
+            //targets = DrawTargets();
             stop.IsEnabled = false;
         }
         public void DrawRectangles()
@@ -52,10 +56,21 @@ namespace Bargaining_game_implementation
             {
                 for (int i = 0; i < height; i++)
                 {
-                    Rectangle rect = new Rectangle()
+                    Rectangle rect = new Rectangle();
+                    if (map.Nodes.Exists(x => x.Index == (i, j)))
                     {
-                        Fill = Brushes.Gray
-                    };
+                        rect = new Rectangle()
+                        {
+                            Fill = Brushes.White
+                        };
+                    }
+                    else
+                    {
+                        rect = new Rectangle()
+                        {
+                            Fill = Brushes.Black
+                        };
+                    }
                     Grid.SetRow(rect, i);
                     Grid.SetColumn(rect, j);
                     grid.Children.Add(rect);
@@ -64,6 +79,29 @@ namespace Bargaining_game_implementation
                 }
             }
         }
+        public List<(int,int)> TestTargets()
+        {
+            List<(int, int)> targets = new List<(int, int)>();
+                var number1 = 28;
+                var number2 = 30;
+                if (rectDict[number2 * height + number1].Fill == Brushes.White)
+                {
+                    rectDict[number2 * height + number1].Fill = Brushes.Red;
+                    targets.Add((number1, number2));
+                    var node = map.Nodes.Find(x => x.Index == (number1, number2));
+                    node.IsOccupied = true;
+                }
+            number1 = 2;
+            number2 = 30;
+            if (rectDict[number2 * height + number1].Fill == Brushes.White)
+            {
+                rectDict[number2 * height + number1].Fill = Brushes.Red;
+                targets.Add((number1, number2));
+                var node = map.Nodes.Find(x => x.Index == (number1, number2));
+                node.IsOccupied = true;
+            }
+            return targets;
+        }
         public List<(int,int)> DrawTargets()
         {
             List<(int, int)> targets = new List<(int, int)>();
@@ -71,10 +109,12 @@ namespace Bargaining_game_implementation
             {
                 var number1 = rnd.Next(0, height);
                 var number2 = rnd.Next(0, width);
-                if (rectDict[number2*height+number1].Fill == Brushes.Gray)
+                if (rectDict[number2*height+number1].Fill == Brushes.White)
                 {
                     rectDict[number2*height+number1].Fill = Brushes.Red;
                     targets.Add((number1, number2));
+                    var node = map.Nodes.Find(x => x.Index == (number1, number2));
+                    node.IsOccupied = true;
                 }
                 else
                 {
@@ -104,6 +144,26 @@ namespace Bargaining_game_implementation
                 agents.Add(new Agent(this));
             }
             DrawAgents();
+            //TestAgents();
+        }
+        public void TestAgents()
+        {
+            var x = 30;
+            var y = 4;
+            var headPosition = x * height + y;
+            if (rectDict[headPosition].Fill == Brushes.White)
+            {
+                agents[0].HeadPosition = map.Nodes.Find(node => node.Index == (y, x));
+                rectDict[headPosition].Fill = Brushes.Blue;
+            }
+            x = 30;
+            y = 20;
+            headPosition = x * height + y;
+            if (rectDict[headPosition].Fill == Brushes.White)
+            {
+                agents[1].HeadPosition = map.Nodes.Find(node => node.Index == (y, x));
+                rectDict[headPosition].Fill = Brushes.Blue;
+            }
         }
         public void DrawAgents()
         {
@@ -112,12 +172,13 @@ namespace Bargaining_game_implementation
                 bool draw = true;
                 while (draw)
                 {
-                    agent.HeadPosition[0] = rnd.Next(0, height);
-                    agent.HeadPosition[1] = rnd.Next(0, width);
-                    var headPosition = agent.HeadPosition[1] * height + agent.HeadPosition[0];
-                    if (rectDict[headPosition].Fill == Brushes.Gray)
+                    var x = rnd.Next(0, width);
+                    var y = rnd.Next(0, height);
+                    var headPosition = x * height + y;
+                    if (rectDict[headPosition].Fill == Brushes.White)
                     {
-                        rectDict[headPosition].Fill = Brushes.Green;
+                        agent.HeadPosition = map.Nodes.Find(node=> node.Index == (y, x));
+                        rectDict[headPosition].Fill = Brushes.Blue;
                         draw = false;
                     }
                 }
@@ -132,21 +193,43 @@ namespace Bargaining_game_implementation
             }
             if (!moving)
             {
-                Iteration();
+                targets = DrawTargets();
+                GetPaths();
             }
             foreach (var agent in agents)
             {
-                int direction = 0;
-                if (agent.Moves.Any())
+                Node direction = new Node();
+                if (agent.Path.Any())
                 {
-                    direction = agent.Moves.FirstOrDefault();
-                    agent.Moves.RemoveAt(0);
+                    direction = agent.Path.FirstOrDefault();
+                    if (direction.IsOccupied && direction.Index!=agent.Target.Index)
+                    {
+                        if (agent.IsWaiting)
+                        {
+                            foreach (var node in agent.HeadPosition.Neighbors)
+                            {
+                                if (!node.IsOccupied)
+                                {
+                                    agent.Path.Insert(0, agent.HeadPosition);
+                                    agent.Move(node);
+                                    agent.IsWaiting = false;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            agent.IsWaiting = true;
+                        }
+                        continue;
+                    }
+                    agent.IsWaiting = false;
+                    agent.Path.RemoveAt(0);
+                    agent.Move(direction);
                 }
                 else
                 {
                     agent.IsFocusedOnTarget = false;
                 }
-                agent.Move(direction);
             }
         }
         private void Start_Click(object sender, RoutedEventArgs e)
@@ -178,37 +261,8 @@ namespace Bargaining_game_implementation
                 stop.Content = "Stop";
             }
         }
-
-        bool CheckMax(Agent snake1, Agent snake2)
+        public void GetPaths()
         {
-            int maxOld = Math.Max(
-                Math.Abs(snake1.Target[0] - snake1.HeadPosition[0])+Math.Abs(snake1.Target[1] - snake1.HeadPosition[1]),
-                Math.Abs(snake2.Target[0] - snake2.HeadPosition[0])+Math.Abs(snake2.Target[1] - snake2.HeadPosition[1])
-                );
-            int maxNew = Math.Max(
-                Math.Abs(snake1.Target[0] - snake2.HeadPosition[0])+Math.Abs(snake1.Target[1] - snake2.HeadPosition[1]),
-                Math.Abs(snake2.Target[0] - snake1.HeadPosition[0])+Math.Abs(snake2.Target[1] - snake1.HeadPosition[1])
-               );
-            if (maxOld > maxNew) return false;
-
-            return true;
-                //wywala true jak zmiana jest niepotrzebna
-        }
-
-        void ChangeTargets(Agent snake1, Agent snake2)
-        {
-            var temporary = snake1.Target[0];
-            snake1.Target[0] = snake2.Target[0];
-            snake2.Target[0] = temporary;
-
-            temporary = snake1.Target[1];
-            snake1.Target[1] = snake2.Target[1];
-            snake2.Target[1] = temporary;
-        }
-        public void Iteration()
-        {
-
-            List<(int, int)> targets = DrawTargets();
             var targetsTemp = new List<(int, int)>(targets);
             foreach (var agent in agents)
             {
@@ -224,34 +278,14 @@ namespace Bargaining_game_implementation
                     "Save", MessageBoxButton.YesNoCancel,
                     MessageBoxImage.Question, MessageBoxResult.Cancel) != MessageBoxResult.Yes);*/
                 }
-                agent.Target[0] = target.Item1;
-                agent.Target[1] = target.Item2;
+                var node = map.Nodes.Find(x => x.Index == (target.Item1, target.Item2));
+                agent.Target = node;
+                agent.Path = map.AStarSearch(agent.HeadPosition, agent.Target);
             }
-
-            int[] fruitArray = new int[width * height];
-            foreach (var target in targets)
+            foreach(var agent in agents)
             {
-                fruitArray[target.Item2 * height + target.Item1] = 2;
-            }
-
-            bool change = true;
-            while (change)
-            {
-                change = false;
-                foreach (var agent in agents)
-                {
-                    foreach (var agent2 in agents)
-                    {
-                        if (agent2 == agent) continue;
-                        if (!CheckMax(agent, agent2))
-                        {
-                            ChangeTargets(agent, agent2);
-                            // przy maksymalnej odleglosci - zmiana
-                            change = true;
-                        }
-
-                    }
-                }
+                var node = map.Nodes.Find(x => x.Index == (agent.HeadPosition.Index.x, agent.HeadPosition.Index.y));
+                node.IsOccupied = true;
             }
         }
     }
